@@ -1,8 +1,10 @@
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export function Contador() {
   const [count, setCount] = useState(0);
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.text}>Contador: {count}</Text>
