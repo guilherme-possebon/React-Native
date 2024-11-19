@@ -1,12 +1,12 @@
-import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { theme } from "../../themes/global";
 
 export function Contador() {
   const [count, setCount] = useState(0);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={theme.container}>
       <Text style={styles.text}>Contador: {count}</Text>
 
       <TouchableOpacity
@@ -21,12 +21,6 @@ export function Contador() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   text: {
     color: "#f00",
     fontSize: 20,

@@ -1,33 +1,24 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import { ParamListBase, useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import { theme } from "../../../../themes/global";
 
 interface NavigationButtonProps {
   pageName: string;
+  navigate: string;
 }
 
-export function NavigationButton({ pageName }: NavigationButtonProps) {
-  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+export function NavigationButton({
+  pageName,
+  navigate,
+}: NavigationButtonProps) {
+  const navigation = useNavigation<NavigationPropType>();
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate(`${pageName}`)}
-      style={styles.buttonStyles}
+      onPress={() => navigation.navigate(`${navigate}`)}
+      style={theme.button}
     >
-      <Text style={styles.text}>Navegar para {pageName}</Text>
+      <Text style={theme.textButton}>{pageName}</Text>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  buttonStyles: {
-    padding: 16,
-    backgroundColor: "#6e06af",
-    borderRadius: 8,
-    margin: 8,
-  },
-  text: {
-    color: "#fff",
-  },
-});

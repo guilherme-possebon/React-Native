@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { IUser } from "../../@types/user";
+import { theme } from "../../themes/global";
 
 export function Account() {
   const [user, setUser] = useState<IUser>({} as IUser);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={theme.container}>
       <Text style={styles.textStyle}>Name: {user.name}</Text>
       <Text style={styles.textStyle}>Age: {user.age}</Text>
       <Text style={styles.textStyle}>City: {user.city}</Text>
@@ -20,11 +21,6 @@ export function Account() {
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   button: {
     backgroundColor: "#3f51b5",
     padding: 16,

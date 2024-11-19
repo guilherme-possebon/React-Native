@@ -1,20 +1,22 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NavigationButton } from "./components/NavigationButton";
-import { StyleSheet } from "react-native";
+import { theme } from "../../themes/global";
+import { StyleSheet, View } from "react-native";
 
 export function Home() {
   return (
-    <SafeAreaView style={styles.container}>
-      <NavigationButton pageName="Account" />
-      <NavigationButton pageName="Contador" />
+    <SafeAreaView style={theme.container}>
+      <View style={styles.navigationContainer}>
+        <NavigationButton pageName="Account" navigate="Account" />
+        <NavigationButton pageName="Contador" navigate="Contador" />
+        <NavigationButton pageName="Lista de tarefas" navigate="ToDoList" />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  navigationContainer: {
+    gap: 8,
   },
 });
