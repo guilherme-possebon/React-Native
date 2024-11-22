@@ -46,4 +46,9 @@ export const theme = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
+  listContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
 });

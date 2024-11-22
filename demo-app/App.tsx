@@ -1,13 +1,15 @@
-import React from "react";
+import React, { StrictMode } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StackRoutes } from "./src/StackRoutes";
 
 export default function App() {
   return (
     <>
-      <NavigationContainer>
-        <StackRoutes />
-      </NavigationContainer>
+      <StrictMode>
+        <NavigationContainer>
+          <StackRoutes />
+        </NavigationContainer>
+      </StrictMode>
     </>
   );
 }
