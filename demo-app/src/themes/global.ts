@@ -6,6 +6,7 @@ export const colors = {
   orange: "#BF360C",
   backgroundInput: "#FFAB91",
   white: "#FFF",
+  black: "#000",
 };
 
 export const theme = StyleSheet.create({
@@ -45,10 +46,18 @@ export const theme = StyleSheet.create({
   listItem: {
     fontSize: 16,
     marginBottom: 8,
+    color: colors.black,
+  },
+  listItemLineThrough: {
+    textDecorationLine: "line-through",
   },
   listContainer: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignContent: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: colors.blue,
   },
 });

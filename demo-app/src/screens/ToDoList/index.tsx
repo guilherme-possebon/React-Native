@@ -1,24 +1,24 @@
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
 } from "react-native";
-import { colors, theme } from "../../themes/global";
+import { theme } from "../../themes/global";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ITask } from "../../@types/task";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+
+import { Item } from "./components/Item";
 
 export function ToDoList() {
   const [text, setText] = useState<string>("");
   const [id, setId] = useState<number>(0);
   const [list, setList] = useState<ITask[]>([]);
+  const [isChecked, setIsChecked] = useState(false);
 
   const save = (value: string) => {
     setId((prev) => prev + 1);
@@ -29,6 +29,7 @@ export function ToDoList() {
       {
         id: id,
         title: value,
+        checked: isChecked,
       },
     ];
 
@@ -73,28 +74,34 @@ export function ToDoList() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const Item = ({ title, id }: ITask) => (
-    <View style={theme.listContainer}>
-      <Text style={theme.listItem}>{title}</Text>
-      <TouchableOpacity
-        onPress={() => {
+  const removeItem = (id: number) => {
+    Alert.alert("Remover item", "Tem certeza?", [
+      {
+        text: "Cancelar",
+        onPress: () => {
+          console.log("Cancelado");
+        },
+      },
+      {
+        text: "Sim",
+        onPress: () => {
           const copy = [...list];
           const newArr = copy.filter((ele, ind) => ele.id !== id);
 
           setList(newArr);
           storeData(newArr, "TodoList");
-        }}
-      >
-        <Text>
-          <FontAwesome5 name="trash-alt" size={24} color="black" />
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
+        },
+      },
+    ]);
+  };
+
+  const handleIsCheckedValue = (isChecked: boolean) => {
+    setIsChecked(isChecked);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -111,7 +118,15 @@ export function ToDoList() {
 
         <FlatList
           data={list}
-          renderItem={({ item }) => <Item title={item.title} id={item.id} />}
+          renderItem={({ item }) => (
+            <Item
+              title={item.title}
+              id={item.id}
+              checked={item.checked}
+              isCheckedState={handleIsCheckedValue}
+              onRemove={removeItem}
+            />
+          )}
           keyExtractor={(item: ITask, index: number) => "key" + index}
         />
       </SafeAreaView>
