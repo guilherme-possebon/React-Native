@@ -3,6 +3,7 @@ import { Home } from "./screens/Home";
 import { Account } from "./screens/Account";
 import { Contador } from "./screens/Contador";
 import { ToDoList } from "./screens/ToDoList";
+import { Login } from "./screens/Login";
 
 const Stack = createNativeStackNavigator();
 
@@ -13,6 +14,7 @@ export function StackRoutes() {
       <Stack.Screen name="Contador" component={Contador} />
       <Stack.Screen name="Account" component={Account} />
       <Stack.Screen name="ToDoList" component={ToDoList} />
+      <Stack.Screen name="Login" component={Login} />
     </Stack.Navigator>
   );
 }

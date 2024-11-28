@@ -4,7 +4,8 @@ export const colors = {
   background: "#CFD8DC",
   blue: "#2196F3",
   orange: "#BF360C",
-  backgroundInput: "#FFAB91",
+  backgroundInput: "#90A4AE",
+  borderInput: "#455A64",
   white: "#FFF",
   black: "#000",
 };
@@ -34,9 +35,9 @@ export const theme = StyleSheet.create({
     fontSize: 14,
     padding: 12,
     borderWidth: 0.5,
-    borderColor: colors.orange,
+    borderColor: colors.borderInput,
     borderRadius: 8,
-    width: "50%",
+    width: "60%",
   },
   label: {
     fontSize: 20,
