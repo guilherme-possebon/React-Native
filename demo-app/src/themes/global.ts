@@ -61,4 +61,8 @@ export const theme = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.blue,
   },
+  text: {
+    fontSize: 18,
+    fontWeight: 500,
+  },
 });

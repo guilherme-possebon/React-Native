@@ -10,7 +10,7 @@ export function Home() {
         <NavigationButton pageName="Account" navigate="Account" />
         <NavigationButton pageName="Contador" navigate="Contador" />
         <NavigationButton pageName="Lista de tarefas" navigate="ToDoList" />
-        <NavigationButton pageName="Login" navigate="Login" />
+        <NavigationButton pageName="Cep" navigate="Cep" />
       </View>
     </SafeAreaView>
   );

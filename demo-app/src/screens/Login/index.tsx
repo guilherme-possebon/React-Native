@@ -10,8 +10,7 @@ import { Icon } from "../../components/Icon";
 import { ILogin } from "../../@types";
 import { useState } from "react";
 import axios from "axios";
-
-axios.defaults.baseURL = "https://dummyjson.com";
+import { useNavigation } from "@react-navigation/native";
 
 export function Login() {
   const [login, setLogin] = useState<ILogin>({
@@ -19,9 +18,13 @@ export function Login() {
     password: "emilyspass",
   });
 
+  const navigation = useNavigation<NavigationPropType>();
+
   const doLogin = async () => {
+    console.log(123);
+
     if (login && login.username.length > 0 && login.password.length > 0) {
-      const response = await axios.post("/auth/login", {
+      const response = await axios.post("https://dummyjson.com/auth/login", {
         username: login.username,
         password: login.password,
       });
@@ -36,8 +39,7 @@ export function Login() {
             {
               text: "OK",
               onPress: () => {
-                console.log("OK Pressed");
-                setLogin({ ...login, username: "", password: "" });
+                navigation.navigate("Home");
               },
             },
           ],
@@ -47,7 +49,7 @@ export function Login() {
         Alert.alert(
           "Login incorreto",
           "Nome de usuario ou senha inválidos",
-          [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+          [{ text: "OK" }],
           { cancelable: false }
         );
       }
@@ -87,9 +89,3 @@ export function Login() {
     </SafeAreaView>
   );
 }
-
-// const styles = StyleSheet.create({
-//   inputsContainer: {
-
-//   },
-// });
