@@ -46,6 +46,7 @@ export function Cep() {
         style={theme.input}
         placeholder="Digite o CEP"
         value={cep.cep}
+        keyboardType="number-pad"
         onChangeText={(text) => setCep({ ...cep, cep: text })}
       />
 
