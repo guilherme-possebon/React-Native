@@ -20,4 +20,14 @@ export const styles = StyleSheet.create({
     borderColor: colors.dark,
     borderWidth: 0.5,
   },
+  info: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.text,
+  },
+  labelInfo: {
+    fontSize: 16,
+    borderBottomWidth: 1,
+    borderColor: colors.dark,
+  },
 });
