@@ -1,65 +1,78 @@
-import React from "react";
 import {
+  Alert,
   SafeAreaView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { theme } from "../theme/global";
-import { StatusBar } from "expo-status-bar";
+import { colors, theme } from "../themes/global";
 import { router } from "expo-router";
+import { Icon } from "../components/Icon";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { IContact } from "../@types/contact";
 
+//com o expo-router, todas as telas precisam retornar DEFAULT
 export default function App() {
-  return (
-    <>
-      <SafeAreaView style={[theme.container, styles.homeContainer]}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>App Amigo Secreto</Text>
-          <FontAwesome name="handshake-o" size={48} color="black" />
-        </View>
-        <View style={theme.buttonContainer}>
-          <TouchableOpacity
-            onPress={() => router.navigate("/contacts")}
-            style={theme.button}
-          >
-            <View style={theme.buttonContent}>
-              <MaterialCommunityIcons name="contacts" size={24} color="white" />
-              <Text style={theme.buttonText}>Contatos</Text>
-            </View>
-          </TouchableOpacity>
+  async function realizarSorteio() {
+    try {
+      const jsonValue = await AsyncStorage.getItem("contacts_list");
 
-          <TouchableOpacity
-            onPress={() => router.navigate("/sorteio")}
-            style={theme.button}
-          >
-            <View style={theme.buttonContent}>
-              <MaterialCommunityIcons
-                name="horseshoe"
-                size={24}
-                color="white"
-              />
-              <Text style={theme.buttonText}>Realizar sorteio</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-      <StatusBar style="auto" />
-    </>
+      if (jsonValue != null) {
+        const parsed = JSON.parse(jsonValue);
+
+        let participantes: IContact[] = parsed;
+
+        if (participantes.length > 2) {
+          let sorteados: number[] = [];
+
+          let notSort: boolean;
+          for (let x = 0; x < participantes.length; x++) {
+            notSort = true;
+
+            while (notSort) {
+              const random = parseInt(
+                (Math.random() * participantes.length).toString()
+              );
+              if (random != x && !sorteados.includes(random)) {
+                participantes[x].idFriend = random;
+                sorteados.push(random);
+                notSort = false;
+              }
+            }
+          }
+          console.log("SORTEIO = ", participantes);
+        } else {
+          Alert.alert("ATENÇÂO", "Ta sem amigos é?");
+        }
+      } else {
+        Alert.alert("ATENÇÂO", "Nunhum contanto encontrado");
+      }
+    } catch (err) {
+      console.log("🚀 ~ realizarSorteio ~ err:", err);
+    }
+  }
+
+  return (
+    <SafeAreaView style={theme.container}>
+      <Text style={theme.title}>App Amigo Secreto</Text>
+
+      <View style={theme.marginBottom}>
+        <Icon name="handshake-o" color={colors.primary} size={40} />
+      </View>
+
+      <TouchableOpacity
+        onPress={() => router.navigate("contacts")}
+        style={[theme.button, theme.marginBottom]}
+      >
+        <Text style={theme.textButton}>CONTATOS</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => realizarSorteio()}
+        style={[theme.button, theme.marginBottom]}
+      >
+        <Text style={theme.textButton}>REALIZAR SORTEIO</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  homeContainer: {
-    gap: 16,
-  },
-  header: {
-    alignItems: "center",
-    gap: 8,
-  },
-  headerText: {
-    fontSize: 28,
-  },
-});

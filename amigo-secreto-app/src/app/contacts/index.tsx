@@ -1,75 +1,148 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
-import React, { useState } from "react";
-import { colors, theme } from "../../theme/global";
-import Item from "./components/item";
-import { IContacts } from "../../@types";
-import { StatusBar } from "expo-status-bar";
+import { Alert, FlatList, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { colors, theme } from "../../themes/global";
+import { styles } from './styles'
+import { useEffect, useState } from "react";
+import { IContact } from "../../@types/contact";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Icon } from "../../components/Icon";
 
-export default function contacts() {
-  const [contacts, setContacts] = useState<IContacts>({} as IContacts);
-  const [contactsList, setContactsList] = useState<IContacts[]>([]);
-  const [id, setId] = useState<number>(0);
+//com o expo-router, todas as telas precisam retornar DEFAULT
+export default function Contacts() {
 
-  const save = () => {
-    setId((prev) => prev + 1);
+    const [contact, setContact] = useState<IContact>({} as IContact);
+    const [contactsList, setContactsList] = useState<IContact[]>([]);
 
-    const newList = [
-      ...contactsList,
-      { id: id, name: contacts.name, phoneNumber: contacts.phoneNumber },
-    ];
+    const save = () => {
 
-    setContactsList(newList);
-    setContacts({ ...contacts, name: "", phoneNumber: "" });
-  };
+        const newList = [...contactsList,
+        {
+            id: contactsList.length + 1,
+            name: contact.name,
+            number: contact.number
+        }
+        ];
 
-  return (
-    <>
-      <SafeAreaView style={theme.container}>
-        <View style={theme.textInputContainer}>
-          <TextInput
-            placeholder="Escreva o nome do contato"
-            placeholderTextColor={colors.white}
-            value={contacts.name}
-            onChangeText={(name) => setContacts({ ...contacts, name: name })}
-            style={theme.textInput}
-          />
-          <TextInput
-            placeholder="Escreva o numero do contato"
-            placeholderTextColor={colors.white}
-            value={contacts.phoneNumber}
-            onChangeText={(number) =>
-              setContacts({ ...contacts, phoneNumber: number })
+        setContactsList(newList);
+        storeData(newList);
+        setContact({
+            name: '',
+            number: ''
+        } as IContact) //Limpar o objeto de contato utilizado
+    }
+
+    const storeData = async (value: IContact[]) => {
+        try {
+            const jsonValue = JSON.stringify(value);
+            await AsyncStorage.setItem('contacts_list', jsonValue);
+        } catch (e) {
+            // saving error
+            console.log("🚀 ~ storeData ~ e:", e);
+        }
+    };
+
+    const getData = async (): Promise<IContact[]> => {
+        try {
+
+            const jsonValue = await AsyncStorage.getItem('contacts_list');
+
+            if (jsonValue != null) {
+                const parsed = JSON.parse(jsonValue);
+                return parsed;
+            } else {
+                return [];
             }
-            style={theme.textInput}
-          />
-        </View>
-        <TouchableOpacity
-          onPress={() => save()}
-          style={[theme.button, { marginTop: 12 }]}
-        >
-          <Text style={theme.buttonText}>Salvar</Text>
-        </TouchableOpacity>
 
-        <FlatList
-          data={contactsList}
-          renderItem={({ item }) => (
-            <Item
-              name={item.name}
-              phoneNumber={item.phoneNumber}
-              id={item.id}
+        } catch (e) {
+            console.error("Erro ao ler os dados:", e);
+            return [];
+        }
+    };
+
+    const removeItem = (id: number) => {
+        try {
+            Alert.alert('Remover Item', 'Tem certeza disso?', [
+                {
+                    text: 'Cancelar',
+                    onPress: () => {
+                        console.log('Operação cancelada');
+                    }
+                },
+                {
+                    text: 'Sim',
+                    onPress: () => {
+
+                        const newList = contactsList.filter(item => item.id != id);
+
+                        setContactsList(newList);
+                        storeData(newList);
+                    }
+                }
+            ])
+        } catch (err) {
+            console.log("🚀 ~ removeItem ~ err:", err)
+        }
+    }
+
+    useEffect(() => {
+
+        const fetchData = async () => {
+            const fetch = await getData();
+            setContactsList(fetch);
+        }
+
+        fetchData();
+
+    }, []);
+
+    const Item = ({ id, name, number }: IContact) => (
+        <View style={styles.item}>
+            <Text style={styles.contact}>{name} - {number}</Text>
+            <TouchableOpacity
+                onPress={() => removeItem(id)}>
+                <Icon name='trash' size={18} color={colors.red} />
+            </TouchableOpacity>
+        </View>
+    );
+
+    return (
+        <SafeAreaView style={theme.container}>
+
+            <View style={styles.form}>
+                <TextInput
+                    style={theme.input}
+                    onChangeText={(value) => setContact({ ...contact, 
+                        name: value })}
+                    placeholder="Nome"
+                    autoCapitalize="characters"
+                    value={contact.name}
+                />
+
+                <TextInput
+                    style={theme.input}
+                    onChangeText={(value) => setContact({ ...contact, 
+                        number: value })}
+                    placeholder="Telefone"
+                    value={contact.number}
+                />
+
+                <TouchableOpacity
+                    onPress={() => save()}>
+                    <Icon name='save' size={38} color={colors.primary} />
+                </TouchableOpacity>
+            </View>
+
+
+            <Text style={[theme.title, theme.marginTop]}>Lista de Contatos:</Text>
+
+            <FlatList
+                data={contactsList}
+                renderItem={({ item }) =>
+                    <Item id={item.id} name={item.name} number={item.number} />
+                }
+                ListEmptyComponent={<Text style={styles.placeholder}>Lista Vazia</Text>}
+                keyExtractor={item => item.id.toString()}
             />
-          )}
-          keyExtractor={(item: IContacts, index: number) => "key" + index}
-        />
-      </SafeAreaView>
-      <StatusBar style="auto" />
-    </>
-  );
+
+        </SafeAreaView>
+    )
 }
