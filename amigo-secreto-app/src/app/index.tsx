@@ -1,106 +1,50 @@
-import { ActivityIndicator, Alert, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-import { colors, theme } from "../themes/global";
-import { router } from "expo-router";
-import { Icon } from "../components/Icon";
-import { IContact } from "../@types/contact";
-import { useContext, useEffect, useState } from "react";
-import { AppContext } from "../contexts/AppContext";
+import {
+  Text,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useState } from "react";
+import { ILogin } from "../@types/login";
+import axios from "axios";
+import { theme } from "../themes/global";
 
-//com o expo-router, todas as telas precisam retornar DEFAULT
-export default function App() {
+export default function login() {
+  const [login, setLogin] = useState({} as ILogin);
 
-    const { contactsList, getContacts } = useContext(AppContext);
-    const [loading, setLoading] = useState(false);
-
-    async function realizarSorteio() {
-        try {
-
-            let participantes: IContact[] = contactsList;
-
-            if (participantes.length > 2) {
-                //cria um array de números para armazenar os IDs já sorteados
-                let sorteados: number[] = [];
-
-                let notSort: boolean;
-                //percorre a lista de contatos
-                for (let x = 0; x < participantes.length; x++) {
-
-                    notSort = true;
-
-                    while (notSort) {
-                        const random = parseInt((Math.random() * participantes.length).toString());
-                        /*verifica se o sorteado é diferente do participante em questão
-                        e o sorteado não pode estar na lista de contatos já sorteados */
-                        if (random != x && !sorteados.includes(random)) {
-                            participantes[x].idFriend = participantes[random].id;
-                            sorteados.push(random); //adiciona o n sorteado na lista de sorteados
-                            notSort = false;
-                        } else if (random === x && x === participantes.length - 1) {
-                            console.log("🚀 ~ o último pegou o último");
-                            participantes[x].idFriend = participantes[0].idFriend;
-                            participantes[0].idFriend = participantes[random].id;
-                            sorteados.push(random); //adiciona o n sorteado na lista de sorteados
-                            notSort = false;
-                        }
-                        console.log("🚀 ~ realizarSorteio ~ random:", random, sorteados);
-                    }
-                }
-
-                console.log('SORTEIO = ', participantes);
-                //o que fazer agora???
-
-            } else {
-                Alert.alert('Atenção', 'Número de participantes é insuficiente');
-            }
-
-            setLoading(false);
-
-        } catch (err) {
-            console.log("🚀 ~ realizarSorteio ~ err:", err);
-            setLoading(false);
-        }
+  const handleLogin = async () => {
+    try {
+      if (login.username && login.password) {
+        const options = {};
+        const result = await axios.get("http://168.75.68.178", options);
+        console.log();
+      }
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    useEffect(() => {
-
-        getContacts();
-
-    }, []);
-
-    return (
-        <SafeAreaView style={theme.container}>
-
-            {loading && <ActivityIndicator size="large" />}
-
-            <Text style={theme.title}>App Amigo Secreto</Text>
-
-            <View style={theme.marginBottom}>
-                <Icon
-                    name="handshake-o"
-                    color={colors.primary}
-                    size={40} />
-            </View>
-
-            <TouchableOpacity
-                onPress={() => router.navigate('contacts')}
-                style={[theme.button, theme.marginBottom]}>
-                <Text style={theme.textButton}>CONTATOS</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={() => {
-                    setLoading(true);
-
-                    setTimeout(realizarSorteio, 1000);
-
-                    //const refInterval = setInterval(() => realizarSorteio(), 1000);
-                    //console.log("🚀 ~ App ~ refInterval:", refInterval)
-                    //clearInterval(refInterval);
-                }}
-                style={[theme.button, theme.marginBottom]}>
-                <Text style={theme.textButton}>REALIZAR SORTEIO</Text>
-            </TouchableOpacity>
-
-        </SafeAreaView >
-    )
+  return (
+    <SafeAreaView style={theme.container}>
+      <View>
+        <TextInput
+          style={theme.input}
+          placeholder="Nome de usuario"
+          value={login?.username}
+          onChangeText={(text) => setLogin({ ...login, username: text })}
+        />
+        <TextInput
+          style={theme.input}
+          placeholder="Digite a senha"
+          value={login?.password}
+          onChangeText={(text) => setLogin({ ...login, password: text })}
+          secureTextEntry
+        />
+        <TouchableOpacity onPress={() => handleLogin()}>
+          <Text>Entrar</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
 }
