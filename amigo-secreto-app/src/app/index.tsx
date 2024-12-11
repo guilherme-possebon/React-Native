@@ -1,50 +1,89 @@
-import {
-  Text,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import React, { useState } from "react";
-import { ILogin } from "../@types/login";
-import axios from "axios";
-import { theme } from "../themes/global";
+import React, { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { theme } from '../themes/global';
+import { IUser } from '../@types/user';
+import axios from 'axios';
+import { router } from 'expo-router';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function login() {
-  const [login, setLogin] = useState({} as ILogin);
+
+  const [user, setUser] = useState<IUser>({} as IUser);
 
   const handleLogin = async () => {
     try {
-      if (login.username && login.password) {
-        const options = {};
-        const result = await axios.get("http://168.75.68.178", options);
-        console.log();
+
+      if (user.user && user.pass) {
+
+        const authInfo = btoa(`${user.user}:${user.pass}`);
+
+        //passar a autenticação
+        const options = {
+          headers: {
+            'Authorization': `Basic ${authInfo}`
+          }
+        }
+
+        const { status } = await axios.get('/getUsersList', options);
+        if (status === 200) {
+          console.log('STATUS => ', status);
+          router.replace('home');
+        }
+
+      } else {
+        Alert.alert('Atenção', 'Informe usuário e senha');
       }
-    } catch (error) {
-      console.log(error);
+
+    } catch (err) {
+      console.log('ERR => ', err);
     }
-  };
+  }
+
+  const getLocalAuth = async () => {
+    const result = LocalAuthentication.authenticateAsync();
+  }
+
+  useEffect(() => {
+
+    getLocalAuth();
+
+  }, [])
 
   return (
-    <SafeAreaView style={theme.container}>
-      <View>
+    <View style={theme.container}>
+
+      <View style={styles.form}>
         <TextInput
           style={theme.input}
-          placeholder="Nome de usuario"
-          value={login?.username}
-          onChangeText={(text) => setLogin({ ...login, username: text })}
+          placeholder='Usuário'
+          autoCapitalize='none'
+          value={user.user}
+          onChangeText={value => setUser({ ...user, user: value })}
         />
+
         <TextInput
           style={theme.input}
-          placeholder="Digite a senha"
-          value={login?.password}
-          onChangeText={(text) => setLogin({ ...login, password: text })}
+          placeholder='Senha'
+          autoCapitalize='none'
           secureTextEntry
+          value={user.pass}
+          onChangeText={value => setUser({ ...user, pass: value })}
         />
-        <TouchableOpacity onPress={() => handleLogin()}>
-          <Text>Entrar</Text>
+
+        <TouchableOpacity
+          onPress={() => handleLogin()}>
+          <Text>LOGIN</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  form: {
+    width: '100%',
+    flexDirection: 'column',
+    paddingHorizontal: 16
+  }
+})
