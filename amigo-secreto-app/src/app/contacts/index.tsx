@@ -41,7 +41,7 @@ export default function Contacts() {
     setContact({
       name: "",
       number: "",
-    } as IContact); //Limpar o objeto de contato utilizado
+    } as IContact);
   };
 
   const removeItem = (id: number) => {

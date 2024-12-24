@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -17,10 +18,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function login() {
   const [user, setUser] = useState<IUser>({} as IUser);
 
-  const handleLogin = async (usuario: string, senha: string) => {
+  const handleLogin = async (user: string, pass: string) => {
     try {
-      if (user.user && user.pass) {
-        const authInfo = btoa(`${user.user}:${user.pass}`);
+      if (user && pass) {
+        const authInfo = btoa(`${user}:${pass}`);
 
         //passar a autenticação
         const options = {
@@ -33,9 +34,11 @@ export default function login() {
         if (status === 200) {
           console.log("STATUS => ", status);
 
-          await AsyncStorage.setItem("user", user.user);
-          await AsyncStorage.setItem("pass", user.pass);
+          //gravar as informacoes
+          await AsyncStorage.setItem("user", user);
+          await AsyncStorage.setItem("pass", pass);
 
+          //se der certo a autenticacao, navega para Home
           router.replace("home");
         }
       } else {
@@ -48,19 +51,34 @@ export default function login() {
 
   const getLocalAuth = async () => {
     const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
-    if (savedBiometrics) {
-      const biometricAuth = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Login com biometria",
-        disableDeviceFallback: true,
-        cancelLabel: "Cancelar",
-        requireConfirmation: true,
-      });
+    console.log("savedBiometrics", savedBiometrics);
+    const userStorage = (await AsyncStorage.getItem("user")) || "";
+    console.log("🚀 ~ getLocalAuth ~ userStorage:", userStorage);
+    const passStorage = (await AsyncStorage.getItem("pass")) || "";
+    console.log("🚀 ~ getLocalAuth ~ passStorage:", passStorage);
 
-      if (biometricAuth.success) {
+    if (userStorage.length > 0 && passStorage.length > 0) {
+      if (savedBiometrics) {
+        const biometricAuth = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Login com Biometria",
+          disableDeviceFallback: true,
+          cancelLabel: "Cancelar",
+          requireConfirmation: true,
+        });
+
+        console.log("biometricAuth_" + Platform.OS, biometricAuth);
+
+        if (biometricAuth.success) {
+          const userStorage = (await AsyncStorage.getItem("user")) || "";
+          const passStorage = (await AsyncStorage.getItem("pass")) || "";
+          handleLogin(userStorage, passStorage);
+          //navegar para a tela Home
+        }
       }
     }
   };
 
+  //executa na primeira vez que a tela se renderiza
   useEffect(() => {
     getLocalAuth();
   }, []);
@@ -68,26 +86,28 @@ export default function login() {
   return (
     <View style={theme.container}>
       <View style={styles.form}>
-        <View style={{ width: "100%", gap: 16 }}>
-          <TextInput
-            style={theme.input}
-            placeholder="Usuário"
-            autoCapitalize="none"
-            value={user.user}
-            onChangeText={(value) => setUser({ ...user, user: value })}
-          />
+        <Text style={theme.title}>Login</Text>
+        <TextInput
+          style={[theme.input, { width: "80%" }]}
+          placeholder="Usuário"
+          autoCapitalize="none"
+          value={user.user}
+          onChangeText={(value) => setUser({ ...user, user: value })}
+        />
 
-          <TextInput
-            style={theme.input}
-            placeholder="Senha"
-            autoCapitalize="none"
-            secureTextEntry
-            value={user.pass}
-            onChangeText={(value) => setUser({ ...user, pass: value })}
-          />
-        </View>
+        <TextInput
+          style={[theme.input, { width: "80%" }]}
+          placeholder="Senha"
+          autoCapitalize="none"
+          secureTextEntry
+          value={user.pass}
+          onChangeText={(value) => setUser({ ...user, pass: value })}
+        />
 
-        <TouchableOpacity onPress={() => handleLogin()} style={theme.button}>
+        <TouchableOpacity
+          style={theme.button}
+          onPress={() => handleLogin(user.user, user.pass)}
+        >
           <Text style={theme.textButton}>LOGIN</Text>
         </TouchableOpacity>
       </View>
@@ -99,8 +119,8 @@ const styles = StyleSheet.create({
   form: {
     width: "100%",
     flexDirection: "column",
-    paddingHorizontal: 16,
     alignItems: "center",
+    paddingHorizontal: 16,
     gap: 16,
   },
 });

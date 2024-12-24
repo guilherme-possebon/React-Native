@@ -4,63 +4,58 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 export interface IContext {
-    contactsList: IContact[],
-    getContacts: () => void,
-    storeData: (value: IContact[]) => void,
+  contactsList: IContact[];
+  getContacts: () => void;
+  storeData: (value: IContact[]) => void;
 }
 
 //* axios default pode ser colocado aqui
-axios.defaults.baseURL = 'http://168.75.68.178:4000';
+axios.defaults.baseURL = "http://168.75.68.178:4000";
 
 //é a exportacao utilizada nas telas onde se quer buscar algum dado do contexto
 export const AppContext = createContext<IContext>({} as IContext);
 
 //é a exportacao utilizada para envolver as telas do app
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [contactsList, setContactsList] = useState<IContact[]>([]);
 
-    const [contactsList, setContactsList] = useState<IContact[]>([]);
+  const getContacts = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("contacts_list");
 
-    const getContacts = async () => {
-        try {
+      if (jsonValue != null) {
+        const parsed = JSON.parse(jsonValue);
+        setContactsList(parsed);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      console.error("Erro ao ler os dados:", e);
+      return [];
+    }
+  };
 
-            const jsonValue = await AsyncStorage.getItem('contacts_list');
+  const storeData = async (value: IContact[]) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem("contacts_list", jsonValue);
 
-            if (jsonValue != null) {
-                const parsed = JSON.parse(jsonValue);
-                setContactsList(parsed);
-            } else {
-                return [];
-            }
+      setContactsList(value);
+    } catch (e) {
+      // saving error
+      console.log("🚀 ~ storeData ~ e:", e);
+    }
+  };
 
-        } catch (e) {
-            console.error("Erro ao ler os dados:", e);
-            return [];
-        }
-    };
-
-    const storeData = async (value: IContact[]) => {
-        try {
-            const jsonValue = JSON.stringify(value);
-            await AsyncStorage.setItem('contacts_list', jsonValue);
-
-            setContactsList(value);
-
-        } catch (e) {
-            // saving error
-            console.log("🚀 ~ storeData ~ e:", e);
-        }
-    };
-
-    return (
-        <AppContext.Provider
-            value={
-                {
-                    contactsList: contactsList,
-                    getContacts: getContacts,
-                    storeData: storeData
-                }
-            }>
-            {children}
-        </AppContext.Provider>
-    )
-}
+  return (
+    <AppContext.Provider
+      value={{
+        contactsList: contactsList,
+        getContacts: getContacts,
+        storeData: storeData,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
+};
