@@ -2,6 +2,7 @@ import { createContext, ReactNode, useState } from "react";
 import { IContact } from "../@types/contact";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { Alert } from "react-native";
 
 export interface IContext {
   contactsList: IContact[];
@@ -9,13 +10,10 @@ export interface IContext {
   storeData: (value: IContact[]) => void;
 }
 
-//* axios default pode ser colocado aqui
 axios.defaults.baseURL = "http://168.75.68.178:4000";
 
-//é a exportacao utilizada nas telas onde se quer buscar algum dado do contexto
 export const AppContext = createContext<IContext>({} as IContext);
 
-//é a exportacao utilizada para envolver as telas do app
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [contactsList, setContactsList] = useState<IContact[]>([]);
 
@@ -30,7 +28,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return [];
       }
     } catch (e) {
-      console.error("Erro ao ler os dados:", e);
+      Alert.alert("Erro ao ler os dados: " + e);
       return [];
     }
   };
@@ -42,8 +40,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
       setContactsList(value);
     } catch (e) {
-      // saving error
-      console.log("🚀 ~ storeData ~ e:", e);
+      Alert.alert("🚀 ~ storeData ~ e:" + e);
     }
   };
 

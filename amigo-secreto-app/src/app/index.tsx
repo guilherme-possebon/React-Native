@@ -23,7 +23,6 @@ export default function login() {
       if (user && pass) {
         const authInfo = btoa(`${user}:${pass}`);
 
-        //passar a autenticação
         const options = {
           headers: {
             Authorization: `Basic ${authInfo}`,
@@ -32,30 +31,23 @@ export default function login() {
 
         const { status } = await axios.get("/getUsersList", options);
         if (status === 200) {
-          console.log("STATUS => ", status);
-
-          //gravar as informacoes
           await AsyncStorage.setItem("user", user);
           await AsyncStorage.setItem("pass", pass);
 
-          //se der certo a autenticacao, navega para Home
           router.replace("home");
         }
       } else {
         Alert.alert("Atenção", "Informe usuário e senha");
       }
     } catch (err) {
-      console.log("ERR => ", err);
+      Alert.alert("Erro: " + err);
     }
   };
 
   const getLocalAuth = async () => {
     const savedBiometrics = await LocalAuthentication.isEnrolledAsync();
-    console.log("savedBiometrics", savedBiometrics);
     const userStorage = (await AsyncStorage.getItem("user")) || "";
-    console.log("🚀 ~ getLocalAuth ~ userStorage:", userStorage);
     const passStorage = (await AsyncStorage.getItem("pass")) || "";
-    console.log("🚀 ~ getLocalAuth ~ passStorage:", passStorage);
 
     if (userStorage.length > 0 && passStorage.length > 0) {
       if (savedBiometrics) {
@@ -66,19 +58,15 @@ export default function login() {
           requireConfirmation: true,
         });
 
-        console.log("biometricAuth_" + Platform.OS, biometricAuth);
-
         if (biometricAuth.success) {
           const userStorage = (await AsyncStorage.getItem("user")) || "";
           const passStorage = (await AsyncStorage.getItem("pass")) || "";
           handleLogin(userStorage, passStorage);
-          //navegar para a tela Home
         }
       }
     }
   };
 
-  //executa na primeira vez que a tela se renderiza
   useEffect(() => {
     getLocalAuth();
   }, []);
