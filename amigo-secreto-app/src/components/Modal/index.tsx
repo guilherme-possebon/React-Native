@@ -4,8 +4,11 @@ import {
   BottomSheetModal,
   BottomSheetView,
   BottomSheetModalProvider,
+  BottomSheetVirtualizedList,
+  BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
 import { IContact } from "../../@types/contact";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 interface IModal {
   isOpen: boolean;
@@ -16,7 +19,6 @@ interface IModal {
 const Modal = ({ isOpen, setIsOpen, participantesList }: IModal) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // Callbacks to open and close modal
   const open = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
@@ -25,35 +27,31 @@ const Modal = ({ isOpen, setIsOpen, participantesList }: IModal) => {
     bottomSheetModalRef.current?.close();
   }, []);
 
-  // Open/close the modal based on isOpen state
   useEffect(() => {
     if (isOpen) {
       open();
     } else {
       close();
     }
-  }, [isOpen, open, close]); // Only run when `isOpen` changes
+  }, [isOpen, open, close]);
 
-  // Handle sheet changes
   const handleSheetChanges = useCallback(
     (index: number) => {
       if (index === -1 && isOpen) {
-        setIsOpen(false); // Close the modal when the sheet is snapped down
+        setIsOpen(false);
       } else if (index === 0 && !isOpen) {
-        setIsOpen(true); // Open the modal when it's fully expanded
+        setIsOpen(true);
       }
-      console.log("handleSheetChanges", index);
     },
     [isOpen, setIsOpen]
-  ); // Add `isOpen` as a dependency to prevent unnecessary updates
+  );
 
-  // Render the participants list item
   const renderItem: ListRenderItem<IContact> = ({ item }) => (
     <View style={styles.participantItem}>
-      <Text>{item.id}</Text>
-      <Text>{item.name}</Text>
-      <Text>{item.number}</Text>
-      <Text>{item.idFriend}</Text>
+      <Text>id: {item.id}</Text>
+      <Text>nome: {item.name}</Text>
+      <Text>numero: {item.number}</Text>
+      <Text>Id do amigo: {item.idFriend}</Text>
     </View>
   );
 
@@ -62,25 +60,24 @@ const Modal = ({ isOpen, setIsOpen, participantesList }: IModal) => {
       <BottomSheetModal
         ref={bottomSheetModalRef}
         onChange={handleSheetChanges}
-        index={isOpen ? 0 : -1} // Set the index based on the modal state
-        snapPoints={["50%", "90%"]} // Set the snap points for the modal
-        enableContentPanningGesture={true} // Allow panning gestures to close the modal
+        index={isOpen ? 0 : -1}
+        snapPoints={["50%", "90%"]}
+        enableContentPanningGesture={true}
+        enableDynamicSizing
       >
-        <BottomSheetView style={styles.contentContainer}>
-          {participantesList.length > 0 ? (
-            <FlatList
-              data={participantesList}
-              renderItem={renderItem}
-              keyExtractor={(item: IContact) => item.id.toString()}
-              scrollEnabled={true}
-              contentContainerStyle={styles.flatListContent} // Ensures the list grows and is scrollable
-            />
-          ) : (
-            <Text style={styles.noParticipantsText}>
-              No participants available
-            </Text>
-          )}
-        </BottomSheetView>
+        {participantesList.length > 0 ? (
+          <BottomSheetFlatList
+            data={participantesList}
+            renderItem={renderItem}
+            keyExtractor={(item: IContact) => item.id.toString()}
+            contentContainerStyle={styles.flatListContent}
+            scrollEnabled
+          />
+        ) : (
+          <Text style={styles.noParticipantsText}>
+            No participants available
+          </Text>
+        )}
       </BottomSheetModal>
     </BottomSheetModalProvider>
   );
@@ -88,14 +85,13 @@ const Modal = ({ isOpen, setIsOpen, participantesList }: IModal) => {
 
 const styles = StyleSheet.create({
   contentContainer: {
-    // Remove flex: 1, so the BottomSheetView grows based on content
     alignItems: "center",
     paddingTop: 10,
-    width: "100%", // Ensure it takes the full width of the screen
+    width: "100%",
   },
   flatListContent: {
-    flexGrow: 1, // Ensures FlatList grows to take up available space
-    paddingBottom: 20, // Optional: adds padding to the bottom of the list
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   participantItem: {
     marginVertical: 8,

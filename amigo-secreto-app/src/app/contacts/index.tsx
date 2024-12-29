@@ -1,6 +1,7 @@
 import {
   Alert,
   FlatList,
+  ListRenderItem,
   SafeAreaView,
   Text,
   TextInput,
@@ -8,14 +9,13 @@ import {
   View,
 } from "react-native";
 import { colors, theme } from "../../themes/global";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { IContact } from "../../@types/contact";
 import { Icon } from "../../components/Icon";
 
 import styles from "./styles";
 import { AppContext } from "../../contexts/AppContext";
 
-//com o expo-router, todas as telas precisam retornar DEFAULT
 export default function Contacts() {
   const { contactsList, storeData } = useContext(AppContext);
   const [contact, setContact] = useState<IContact>({} as IContact);
@@ -49,9 +49,6 @@ export default function Contacts() {
       Alert.alert("Remover Item", "Tem certeza disso?", [
         {
           text: "Cancelar",
-          onPress: () => {
-            console.log("Operação cancelada");
-          },
         },
         {
           text: "Sim",
@@ -63,16 +60,16 @@ export default function Contacts() {
         },
       ]);
     } catch (err) {
-      console.log("🚀 ~ removeItem ~ err:", err);
+      Alert.alert("Erro: " + err);
     }
   };
 
-  const Item = ({ id, name, number }: IContact) => (
+  const Item: ListRenderItem<IContact> = ({ item }) => (
     <View style={styles.item}>
       <Text style={styles.contact}>
-        {name} - {number}
+        {item.name} - {item.number}
       </Text>
-      <TouchableOpacity onPress={() => removeItem(id)}>
+      <TouchableOpacity onPress={() => removeItem(item.id)}>
         <Icon name="trash" size={18} color={colors.red} />
       </TouchableOpacity>
     </View>
@@ -115,9 +112,7 @@ export default function Contacts() {
 
       <FlatList
         data={contactsList}
-        renderItem={({ item }) => (
-          <Item id={item.id} name={item.name} number={item.number} />
-        )}
+        renderItem={Item}
         ListEmptyComponent={<Text style={styles.placeholder}>Lista Vazia</Text>}
         keyExtractor={(item) => item.id.toString()}
       />
